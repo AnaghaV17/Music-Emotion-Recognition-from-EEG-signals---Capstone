@@ -33,7 +33,7 @@ Run the app:
 
    python app.py
 
-Open http://localhost:5000 in your browser.
+Open http://localhost:5002 in your browser.
 
 Notes and assumptions
 ---------------------
@@ -41,4 +41,3 @@ Notes and assumptions
 - Models are loaded with pickle or torch.load. If your model requires a custom class, ensure it's importable from the Python path or replace loading logic accordingly.
 - This demo normalizes song features using StandardScaler and drops very low-variance columns (variance <= 0.01). This mirrors preprocessing in your snippet.
 
-If you want enhancements (async prediction, progress, model metadata display), ask and I will add them.

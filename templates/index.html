@@ -13,21 +13,63 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      /* keep a subtle gradient as a fallback */
+      background: linear-gradient(135deg, #111217 0%, #2b2f36 100%);
       min-height: 100vh;
-      color: #333;
+      color: #222;
+      position: relative;
+      overflow-x: hidden;
     }
 
+    :root {
+      --pastel-rose: #fff6f8;
+      --pastel-sky: #f6fbff;
+      --pastel-mint: #f6fff8;
+      --pastel-lav: #fbf6ff;
+      --text-muted: #4b5563;
+    }
+
+    /* full-bleed muted dark video background */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .video-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.35) contrast(1.05) saturate(0.7);
+      transform: translateZ(0);
+    }
+
+    /* center content in a light box for contrast against the dark video */
     .container {
       max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
+      margin: 40px auto;
+      padding: 28px;
+      position: relative;
+    }
+
+    .content-box {
+      /* slightly transparent bright gradient so the video can show through */
+      background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(140,197,241,0.80) 50%, rgba(255,250,240,0.92) 100%);
+      border-radius: 14px;
+      padding: 26px;
+      box-shadow: 0 18px 42px rgba(11,37,69,0.12);
+      color: #0b2545; /* dark text for contrast on light background */
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.08);
     }
 
     .header {
       text-align: center;
-      margin-bottom: 40px;
-      color: white;
+      margin-bottom: 24px;
+      color: #111;
     }
 
     .header h1 {
@@ -38,15 +80,14 @@
 
     .header p {
       font-size: 1.2rem;
-      opacity: 0.9;
+      opacity: 0.6;
     }
 
     .upload-section {
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      background: transparent;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 20px;
     }
 
     .upload-grid {
@@ -57,18 +98,19 @@
     }
 
     .upload-box {
-      border: 3px dashed #ddd;
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 10px;
-      padding: 30px;
+      padding: 28px;
       text-align: center;
-      transition: all 0.3s ease;
+      transition: all 0.28s ease;
       cursor: pointer;
-      background: #f8f9fa;
+      background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.04));
+      color: #fff;
     }
 
     .upload-box:hover {
-      border-color: #667eea;
-      background: #f0f2ff;
+      border-color: rgba(255,255,255,0.18);
+      background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.06));
     }
 
     .upload-box.dragover {
@@ -175,12 +217,18 @@
     }
 
     .model-result {
-      background: white;
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
+      background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.08));
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 8px 26px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: transform 0.25s ease;
+      color: #fff; /* white text */
     }
+
+    /* per-panel tints for clarity over dark background */
+    #opensmileResult { background: rgba(255,255,255,0.02); }
+    #yamnetResult { background: rgba(255,255,255,0.015); }
 
     .model-result:hover {
       transform: translateY(-5px);
@@ -234,37 +282,15 @@
     }
 
     .emotion-tag {
-      background: #f8f9fa;
+      background: rgba(0,0,0,0.12);
       padding: 5px 12px;
       border-radius: 15px;
       font-size: 0.85rem;
-      color: #495057;
-      border: 1px solid #dee2e6;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.03);
     }
 
-    .probability-bar {
-      margin: 15px 0;
-    }
-
-    .probability-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.9rem;
-      margin-bottom: 5px;
-    }
-
-    .progress {
-      width: 100%;
-      height: 10px;
-      background: #e9ecef;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      transition: width 0.5s ease;
-    }
+    
 
     .error-message {
       background: #f8d7da;
@@ -283,7 +309,7 @@
     }
 
 
-    .models-legend-row {
+  .models-legend-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -292,10 +318,10 @@
     }
 
     .models-status {
-      background: rgba(255,255,255,0.06);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
+      background: rgba(0,0,0,0.12);
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
       flex: 1 1 auto;
       text-align: left;
     }
@@ -324,16 +350,19 @@
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      padding: 8px;
+      padding: 10px;
       border-radius: 8px;
-      background: #fafafa;
+      background: rgba(0,0,0,0.10);
       margin-bottom: 8px;
-      border: 1px solid #eee;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: #fff;
     }
 
     .class-entry.predicted {
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-      border: 2px solid rgba(0,0,0,0.06);
+      box-shadow: 0 8px 22px rgba(2,6,23,0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.12));
+      color: #fff;
     }
 
     .class-color {
@@ -387,8 +416,45 @@
   </style>
 </head>
 <body>
+  <div class="video-bg" aria-hidden="true">
+    <video id="bgVideo" autoplay muted loop playsinline preload="metadata">
+      <!-- try MOV variants (use quicktime MIME) -->
+      <source src="/static/neurons.mov" type="video/quicktime">
+      <source src="/static/neurons2.mov" type="video/quicktime">
+      <source src="/static/neuron.mov" type="video/quicktime">
+      <!-- fallback image -->
+      <img src="/static/vd_space.png" alt="background" />
+    </video>
+    <script>
+      // If the browser fails to play the first source, cycle through available sources
+      (function(){
+        const video = document.getElementById('bgVideo');
+        if (!video) return;
+        const sources = Array.from(video.querySelectorAll('source')).map(s => s.src);
+        let idx = 0;
+        function tryNext() {
+          idx++;
+          if (idx >= sources.length) return; // no more fallbacks
+          video.pause();
+          // update src and try to load
+          video.src = sources[idx];
+          video.load();
+          video.play().catch(()=>{});
+        }
+        video.addEventListener('error', function(e){
+          // attempt to fallback to next source on error
+          tryNext();
+        });
+        // if metadata didn't load in a few seconds, try fallbacks (some codecs block load)
+        setTimeout(function(){
+          if (video.readyState < 2) tryNext();
+        }, 1500);
+      })();
+    </script>
+  </div>
   <div class="container">
-    <div class="header">
+  <div class="content-box">
+  <div class="header">
       <h1>Emotion Recognition System</h1>
       <p>EEG + Music Emotion Classification using GESSNet Models</p>
     </div>
@@ -400,7 +466,7 @@
     </div>
 
     <div class="legend-center" style="text-align:center; margin:18px 0;">
-      <div style="color:white;margin-bottom:10px;font-weight:700">Valence-Dominance space</div>
+      <div style="color:black;margin-bottom:10px;font-weight:700">Valence-Dominance space</div>
       <img src="/static/vd_space.png" id="vdSpaceImg" alt="vd space placeholder" style="width:50vw; max-width:100%; height:auto; border-radius:8px; border:2px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.02);" />
     </div>
 
@@ -434,7 +500,7 @@
     <div id="errorContainer"></div>
         
     <div class="results-section" id="resultsSection">
-      <h2 style="text-align: center; color: white; margin-bottom: 30px;">Prediction Results</h2>
+      <h2 style="text-align: center; color: Black; margin-bottom: 30px;">Prediction Results</h2>
       <div class="results-grid">
         <div class="model-result" id="opensmileResult">
           <div class="model-header">
@@ -446,15 +512,7 @@
             <div class="emotion-description" id="opensmileDescription"></div>
                         <div class="class-emotion-list" id="opensmileClassList"></div>
             <div class="emotion-list" id="opensmileEmotions"></div>
-            <div class="probability-bar">
-              <div class="probability-label">
-                <span>Confidence</span>
-                <span id="opensmileConfidence">0%</span>
-              </div>
-              <div class="progress">
-                <div class="progress-fill" id="opensmileProgress"></div>
-              </div>
-            </div>
+            
           </div>
         </div>
 
@@ -468,19 +526,12 @@
             <div class="emotion-description" id="yamnetDescription"></div>
                         <div class="class-emotion-list" id="yamnetClassList"></div>
             <div class="emotion-list" id="yamnetEmotions"></div>
-            <div class="probability-bar">
-              <div class="probability-label">
-                <span>Confidence</span>
-                <span id="yamnetConfidence">0%</span>
-              </div>
-              <div class="progress">
-                <div class="progress-fill" id="yamnetProgress"></div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
     </div>
+    </div> <!-- end content-box -->
   </div>
 
   <script>
@@ -715,8 +766,7 @@
       const label = document.getElementById(model + 'Label');
       const description = document.getElementById(model + 'Description');
       const emotions = document.getElementById(model + 'Emotions');
-      const confidence = document.getElementById(model + 'Confidence');
-      const progress = document.getElementById(model + 'Progress');
+  
       const classListEl = document.getElementById(model + 'ClassList');
             
       // Accept several possible shapes for result
@@ -777,21 +827,8 @@
         emotions.appendChild(tag);
       });
             
-      // Set confidence
-      // compute confidence as the max probability
-      let maxProb = 0;
-      try {
-        const arr = Array.isArray(probs) ? probs.map(Number) : [Number(probs) || 0];
-        maxProb = Math.max(...arr);
-      } catch (e) {
-        maxProb = 0;
-      }
-      const confidencePercent = clampPercent((maxProb || 0) * 100);
-      confidence.textContent = confidencePercent + '%';
-      progress.style.width = confidencePercent + '%';
-      progress.style.backgroundColor = color;
-      // also color the label background
-      label.style.backgroundColor = color;
+      
+  label.style.backgroundColor = color;
     }
 
     // Initialize

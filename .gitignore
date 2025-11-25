@@ -28,3 +28,6 @@ env/
 
 # Checkpoints/backups
 .checkpoints/
+# Video files (keep large binaries out of git)
+*.mov
+static/*.mov

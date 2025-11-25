@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotion Recognition System - GESSNet</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .upload-section {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .upload-box {
+      border: 3px dashed #ddd;
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: #f8f9fa;
+    }
+
+    .upload-box:hover {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+
+    .upload-box.dragover {
+      border-color: #667eea;
+      background: #e8ebff;
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #667eea;
+    }
+
+    .upload-box h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .upload-box p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin: 10px;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-weight: 600;
+      color: #28a745;
+    }
+
+    .process-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .process-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    .process-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .results-section {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .model-result {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .model-result:hover {
+      transform: translateY(-5px);
+    }
+
+    .model-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .model-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .model-type {
+      font-size: 0.9rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .emotion-result {
+      text-align: center;
+    }
+
+    .emotion-label {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .emotion-description {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .emotion-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .emotion-tag {
+      background: #f8f9fa;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      color: #495057;
+      border: 1px solid #dee2e6;
+    }
+
+    .probability-bar {
+      margin: 15px 0;
+    }
+
+    .probability-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: #e9ecef;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border: 1px solid #f5c6cb;
+    }
+
+    .loading-message {
+      text-align: center;
+      color: white;
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+
+
+    .models-legend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .models-status {
+      background: rgba(255,255,255,0.06);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      flex: 1 1 auto;
+      text-align: left;
+    }
+
+    .legend {
+      width: 50vw;
+      flex: 0 0 50vw;
+      text-align: center;
+    }
+
+    .legend img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .class-emotion-list {
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    .class-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 8px;
+      background: #fafafa;
+      margin-bottom: 8px;
+      border: 1px solid #eee;
+    }
+
+    .class-entry.predicted {
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      border: 2px solid rgba(0,0,0,0.06);
+    }
+
+    .class-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-top: 4px;
+      flex: 0 0 12px;
+    }
+
+    .class-label {
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .class-emotions {
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-online {
+      background: #28a745;
+    }
+
+    .status-offline {
+      background: #dc3545;
+    }
+
+    @media (max-width: 768px) {
+      .upload-grid,
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Emotion Recognition System</h1>
+      <p>EEG + Music Emotion Classification using GESSNet Models</p>
+    </div>
+
+    <div class="models-legend-row">
+      <div class="models-status" id="modelsStatus">
+        <div id="statusContent">Checking model status...</div>
+      </div>
+    </div>
+
+    <div class="legend-center" style="text-align:center; margin:18px 0;">
+      <div style="color:white;margin-bottom:10px;font-weight:700">Valence-Dominance space</div>
+      <img src="/static/vd_space.png" id="vdSpaceImg" alt="vd space placeholder" style="width:50vw; max-width:100%; height:auto; border-radius:8px; border:2px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.02);" />
+    </div>
+
+    <div class="upload-section">
+      <div class="upload-grid">
+        <div class="upload-box" onclick="document.getElementById('eegFile').click()">
+          <div class="upload-icon">🧠</div>
+          <h3>EEG Data</h3>
+          <p>Upload your EEG data (.npy file)</p>
+          <div class="file-name" id="eegFileName"></div>
+          <input type="file" id="eegFile" class="file-input" accept=".npy">
+        </div>
+
+    <div class="upload-box" onclick="document.getElementById('audioFile').click()">
+          <div class="upload-icon">🎵</div>
+          <h3>Audio File</h3>
+          <p>Upload your audio file (.wav format)</p>
+          <div class="file-name" id="audioFileName"></div>
+  <input type="file" id="audioFile" class="file-input" accept=".wav">
+  <!-- audio player shown inside the audio upload box -->
+  <audio id="audioPlayer" controls style="width:100%; display:none; margin-top:12px;"></audio>
+        </div>
+      </div>
+
+
+      <button class="process-btn" id="processBtn" onclick="processFiles()" disabled>
+        Process & Predict Emotions
+      </button>
+    </div>
+
+    <div id="errorContainer"></div>
+        
+    <div class="results-section" id="resultsSection">
+      <h2 style="text-align: center; color: white; margin-bottom: 30px;">Prediction Results</h2>
+      <div class="results-grid">
+        <div class="model-result" id="opensmileResult">
+          <div class="model-header">
+            <div class="model-name">GESSNet + OpenSMILE</div>
+            <div class="model-type">Traditional Audio Features</div>
+          </div>
+          <div class="emotion-result">
+            <div class="emotion-label" id="opensmileLabel">Loading...</div>
+            <div class="emotion-description" id="opensmileDescription"></div>
+                        <div class="class-emotion-list" id="opensmileClassList"></div>
+            <div class="emotion-list" id="opensmileEmotions"></div>
+            <div class="probability-bar">
+              <div class="probability-label">
+                <span>Confidence</span>
+                <span id="opensmileConfidence">0%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-fill" id="opensmileProgress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="model-result" id="yamnetResult">
+          <div class="model-header">
+            <div class="model-name">GESSNet + YAMNet</div>
+            <div class="model-type">Deep Audio Embeddings</div>
+          </div>
+          <div class="emotion-result">
+            <div class="emotion-label" id="yamnetLabel">Loading...</div>
+            <div class="emotion-description" id="yamnetDescription"></div>
+                        <div class="class-emotion-list" id="yamnetClassList"></div>
+            <div class="emotion-list" id="yamnetEmotions"></div>
+            <div class="probability-bar">
+              <div class="probability-label">
+                <span>Confidence</span>
+                <span id="yamnetConfidence">0%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-fill" id="yamnetProgress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let eegFile = null;
+    let audioFile = null;
+
+    // File input handlers
+    document.getElementById('eegFile').addEventListener('change', function(e) {
+      eegFile = e.target.files[0];
+      document.getElementById('eegFileName').textContent = eegFile ? eegFile.name : '';
+      checkFilesSelected();
+    });
+
+    document.getElementById('audioFile').addEventListener('change', function(e) {
+      // revoke previous object URL if present
+      try { if (window.__audioObjectUrl) { URL.revokeObjectURL(window.__audioObjectUrl); window.__audioObjectUrl = null; } } catch (e) {}
+      audioFile = e.target.files[0];
+      document.getElementById('audioFileName').textContent = audioFile ? audioFile.name : '';
+      checkFilesSelected();
+      // show audio player immediately inside the upload box
+      if (audioFile) {
+        const url = URL.createObjectURL(audioFile);
+        window.__audioObjectUrl = url;
+        updateAudioPlayer(audioFile);
+      } else {
+        updateAudioPlayer(null);
+      }
+    });
+
+    // Drag and drop handlers
+    const uploadBoxes = document.querySelectorAll('.upload-box');
+    uploadBoxes.forEach(box => {
+      box.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+      });
+
+      box.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+      });
+
+      box.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+                
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const isEegBox = this.querySelector('.upload-icon').textContent === '🧠';
+          if (isEegBox && files[0].name.endsWith('.npy')) {
+            eegFile = files[0];
+            document.getElementById('eegFileName').textContent = eegFile.name;
+            document.getElementById('eegFile').files = files;
+          } else if (!isEegBox && files[0].name.endsWith('.wav')) {
+            audioFile = files[0];
+            document.getElementById('audioFileName').textContent = audioFile.name;
+            document.getElementById('audioFile').files = files;
+          }
+          checkFilesSelected();
+        }
+      });
+    });
+
+    function checkFilesSelected() {
+      const processBtn = document.getElementById('processBtn');
+      processBtn.disabled = !(eegFile && audioFile);
+    }
+
+    async function checkModelsStatus() {
+      try {
+                const response = await fetch('/status');
+                const status = await response.json();
+
+                const statusContent = document.getElementById('statusContent');
+                let statusHtml = '';
+
+                // backend returns { opensmile: {...}, yamnet: {...} }
+                const opensmileOk = status.opensmile && status.opensmile.status === 'callable';
+                const yamnetOk = status.yamnet && status.yamnet.status === 'callable';
+
+                statusHtml += `<span class="status-indicator ${opensmileOk ? 'status-online' : 'status-offline'}"></span>`;
+                statusHtml += `OpenSMILE Model: ${opensmileOk ? 'Ready' : (status.opensmile && status.opensmile.status ? status.opensmile.status : 'Loading...')}`;
+                statusHtml += '<br>';
+                statusHtml += `<span class="status-indicator ${yamnetOk ? 'status-online' : 'status-offline'}"></span>`;
+                statusHtml += `YAMNet Model: ${yamnetOk ? 'Ready' : (status.yamnet && status.yamnet.status ? status.yamnet.status : 'Loading...')}`;
+                statusHtml += '<br>';
+                
+                statusContent.innerHTML = statusHtml;
+      } catch (error) {
+        document.getElementById('statusContent').innerHTML = 
+          '<span class="status-indicator status-offline"></span>Error checking model status';
+      }
+    }
+
+    async function processFiles() {
+      const processBtn = document.getElementById('processBtn');
+      const resultsSection = document.getElementById('resultsSection');
+      const errorContainer = document.getElementById('errorContainer');
+            
+      // Clear previous results and errors
+      errorContainer.innerHTML = '';
+      resultsSection.style.display = 'none';
+            
+      // Show loading state
+      processBtn.disabled = true;
+      processBtn.innerHTML = 'Processing <span class="spinner"></span>';
+            
+      try {
+                const formData = new FormData();
+                formData.append('eeg_file', eegFile);
+                // backend expects the audio file under the key 'song_file'
+                formData.append('song_file', audioFile);
+                
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            // ask server to return JSON so client won't attempt to parse HTML
+            'Accept': 'application/json'
+          }
+        });
+
+        // Avoid attempting to parse HTML as JSON (causes Unexpected token '<')
+        const ct = response.headers.get('content-type') || '';
+        let data = null;
+        if (ct.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          // throw with some of the HTML to help debugging
+          throw new Error('Server returned non-JSON response: ' + (text ? text.slice(0, 300) : '(empty)'));
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Processing failed');
+        }
+                
+        // Display results
+        displayResults(data);
+        resultsSection.style.display = 'block';
+
+        // set up audio player with the uploaded file
+        try {
+          updateAudioPlayer(audioFile);
+        } catch (e) {
+          console.warn('could not set audio player', e);
+        }
+                
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+                
+      } catch (error) {
+        errorContainer.innerHTML = `
+          <div class="error-message">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+        console.error('Processing error:', error);
+      } finally {
+        processBtn.disabled = false;
+        processBtn.innerHTML = 'Process & Predict Emotions';
+      }
+    }
+
+    function displayResults(data) {
+    // The backend may return results in several shapes; try preferred keys first
+      // prefer the verbose keys used by the server
+      const openKeys = ['GESSNet + OpenSMILE', 'opensmile', 'opensmile_result', 'opensmileResult'];
+      const yamKeys = ['GESSNet + YAMNet', 'yamnet', 'yamnet_result', 'yamnetResult'];
+
+      function pickFirst(obj, keys) {
+        for (const k of keys) {
+          if (obj && Object.prototype.hasOwnProperty.call(obj, k)) return obj[k];
+        }
+        return null;
+      }
+
+      const fallbackOpen = pickFirst(data, openKeys) || (data.results && pickFirst(data.results, ['opensmile', 'GESSNet + OpenSMILE']));
+      const fallbackYam = pickFirst(data, yamKeys) || (data.results && pickFirst(data.results, ['yamnet', 'GESSNet + YAMNet']));
+
+      displayModelResult('opensmile', fallbackOpen || { label: 'N/A', probabilities: [0], emotions: [], color: '#6c757d', description: '' });
+      displayModelResult('yamnet', fallbackYam || { label: 'N/A', probabilities: [0], emotions: [], color: '#6c757d', description: '' });
+    }
+
+    // map labels to colors
+    const LABEL_COLORS = {
+      'HDHV': '#1abc9c',
+      'LDHV': '#f39c12',
+      'LDLV': '#3498db',
+      'HDLV': '#e74c3c'
+    };
+
+    function clampPercent(v) {
+      return Math.max(0, Math.min(100, Math.round(v)));
+    }
+
+    const EMOTION_LABELS = {
+      0: {
+        label: 'HDHV',
+        emotions: ['Joy', 'Amusement', 'Pleasure', 'Pride', 'Interest'],
+        color: '#4CAF50',
+        description: 'Class 0 output from trained model'
+      },
+      1: {
+        label: 'LDHV',
+        emotions: ['Anger', 'Contentment', 'Love', 'Compassion'],
+        color: '#FF5722',
+        description: 'Class 1 output from trained model'
+      },
+      2: {
+        label: 'LDLV',
+        emotions: ['Sadness', 'Disappointment', 'Guilt', 'Regret'],
+        color: '#FF9800',
+        description: 'Class 2 output from trained model'
+      },
+      3: {
+        label: 'HDLV',
+        emotions: ['Fear', 'Disgust', 'Contempt', 'Hate', 'Relief'],
+        color: '#2196F3',
+        description: 'Class 3 output from trained model'
+      }
+    };
+
+    const CLASS_FULL_DESC = {
+      0: 'Class 0 - High Dominance High Valence',
+      1: 'Class 1 - Low Dominance High Valence',
+      2: 'Class 2 - Low Dominance Low Valence',
+      3: 'Class 3 - High Dominance Low Valence'
+    };
+
+    function displayModelResult(model, result) {
+      const label = document.getElementById(model + 'Label');
+      const description = document.getElementById(model + 'Description');
+      const emotions = document.getElementById(model + 'Emotions');
+      const confidence = document.getElementById(model + 'Confidence');
+      const progress = document.getElementById(model + 'Progress');
+      const classListEl = document.getElementById(model + 'ClassList');
+            
+      // Accept several possible shapes for result
+            const labelText = result.label || result.pred_label || (result.pred && String(result.pred)) || 'Unknown';
+            let probs = result.probabilities || result.probs || result.probs_list || result.prob || [0];
+            // normalize nested arrays
+            if (Array.isArray(probs) && probs.length === 1 && Array.isArray(probs[0])) probs = probs[0];
+      const emotionList = result.emotions || (result.labels || []);
+            const color = result.color || LABEL_COLORS[labelText] || '#667eea';
+      const desc = result.description || '';
+            
+      // Set emotion label
+      label.textContent = labelText;
+      label.style.backgroundColor = color;
+            
+      // Set description
+      description.textContent = desc;
+
+      // Render only the predicted class emotions under the prediction
+      if (classListEl) {
+        classListEl.innerHTML = '';
+        try {
+          const predIdx = typeof result.pred === 'number' ? result.pred : parseInt(result.pred);
+          const info = EMOTION_LABELS[predIdx] || null;
+          if (info) {
+            const entry = document.createElement('div');
+            entry.className = 'class-entry predicted';
+            const colorBox = document.createElement('div');
+            colorBox.className = 'class-color';
+            colorBox.style.backgroundColor = info.color;
+            const txt = document.createElement('div');
+            const lab = document.createElement('div');
+            lab.className = 'class-label';
+                        const full = CLASS_FULL_DESC[predIdx] || `${predIdx} - ${info.label}`;
+                        lab.textContent = full;
+            const emo = document.createElement('div');
+            emo.className = 'class-emotions';
+            emo.textContent = info.emotions.join(', ');
+            txt.appendChild(lab);
+            txt.appendChild(emo);
+            entry.appendChild(colorBox);
+            entry.appendChild(txt);
+            classListEl.appendChild(entry);
+          }
+        } catch (e) {
+          classListEl.innerHTML = '';
+        }
+      }
+            
+  // updateAudioPlayer is global so the audio player persists across UI updates
+
+      // Set emotion tags
+      emotions.innerHTML = '';
+      (emotionList || []).forEach(emotion => {
+        const tag = document.createElement('span');
+        tag.className = 'emotion-tag';
+        tag.textContent = emotion;
+        emotions.appendChild(tag);
+      });
+            
+      // Set confidence
+      // compute confidence as the max probability
+      let maxProb = 0;
+      try {
+        const arr = Array.isArray(probs) ? probs.map(Number) : [Number(probs) || 0];
+        maxProb = Math.max(...arr);
+      } catch (e) {
+        maxProb = 0;
+      }
+      const confidencePercent = clampPercent((maxProb || 0) * 100);
+      confidence.textContent = confidencePercent + '%';
+      progress.style.width = confidencePercent + '%';
+      progress.style.backgroundColor = color;
+      // also color the label background
+      label.style.backgroundColor = color;
+    }
+
+    // Initialize
+    checkModelsStatus();
+    setInterval(checkModelsStatus, 5000); // Check every 5 seconds
+
+    // Global helper to update the persistent audio player inside the upload box.
+    function updateAudioPlayer(file) {
+      const player = document.getElementById('audioPlayer');
+      if (!player) return;
+
+      // Revoke previous object URL if we created one earlier
+      try {
+        if (window.__audioObjectUrl) {
+          URL.revokeObjectURL(window.__audioObjectUrl);
+          window.__audioObjectUrl = null;
+        }
+      } catch (e) {
+        // continue silently
+      }
+
+      if (!file) {
+        player.pause();
+        player.removeAttribute('src');
+        player.style.display = 'none';
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      window.__audioObjectUrl = url;
+      player.src = url;
+      player.style.display = 'block';
+      // keep player visible and ready; do not autoplay
+    }
+  </script>
+</body>
+</html>

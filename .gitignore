@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual envs
+venv/
+.env/
+env/
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Data / models (consider tracking using LFS instead)
+*.npy
+*.pkl
+*.pt
+*.pth
+*.ckpt
+
+# Checkpoints/backups
+.checkpoints/

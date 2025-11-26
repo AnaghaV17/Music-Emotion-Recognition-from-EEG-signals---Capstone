@@ -33,7 +33,7 @@ Run the app:
 
    python app.py
 
-Open http://localhost:5000 in your browser.
+Open http://localhost:5002 in your browser.
 
 Notes and assumptions
 ---------------------
